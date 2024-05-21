@@ -1,65 +1,56 @@
-class StopWatch extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            timePassedInMilliSeconds: 0
-        }
+const {useState, useEffect, useRef} = React;
 
-        this.timer = null;
+const StopWatch = () => {
+    const [timePassedInMilliSeconds, setTimePassed] = useState(0);
+    const timer = useRef(null);
 
-        this.start = this.start.bind(this);
-        this.stop = this.stop.bind(this);
-        this.reset = this.reset.bind(this);
-    }
-
-    start() {
-        if (!this.timer) {
+    const start = () => {
+        if (!timer.current) {
             let startTime = Date.now();
-            this.timer = setInterval(() => {
+            timer.current = setInterval(() => {
+                console.log("timePassedInMilliSeconds:", timePassedInMilliSeconds);
                 const stopTime = Date.now();
-                const timePassedInMilliSeconds = stopTime - startTime + this.state.timePassedInMilliSeconds;
-                this.setState({
-                    timePassedInMilliSeconds,
-                });
+
+                // use a call back in setState to get the latest state value
+                setTimePassed(timePassedInMilliSeconds => stopTime - startTime + timePassedInMilliSeconds);
+
                 startTime = stopTime;
-            }, 250);
+            }, 1000);
         }
-    }
+    };
 
-    stop() {
-        window.clearInterval(this.timer);
-        this.timer = null;
-    }
+    const stop = () => {
+        console.log('stop', timer.current);
+        window.clearInterval(timer.current);
+        timer.current = null;
+    };
 
-    reset() {
-        this.stop();
-        this.setState({
-            timePassedInMilliSeconds: 0
-        })
-    }
+    const reset = () => {
+        stop();
+        setTimePassed(0);
+    };
 
-    render() {
-        return (
-            <div>
-                <h2 className="border px-3 py-4 rounded my-3 mx-auto text-center" style={{maxWidth: "300px"}}>
-                    {Math.floor(this.state.timePassedInMilliSeconds / 1000)} s
-                </h2>
-                <div className="d-flex justify-content-center">
-                    <button className="btn btn-outline-primary mr-2" onClick={this.start}>
-                        start
-                    </button>
-                    <button className="btn btn-outline-danger mr-2" onClick={this.stop}>
-                        stop
-                    </button>
-                    <button className="btn btn-outline-warning" onClick={this.reset}>
-                        reset
-                    </button>
-                </div>
+    return (
+        <div>
+            <h2 className="border px-3 py-4 rounded my-3 mx-auto text-center" style={{maxWidth: "300px"}}>
+                {Math.floor(timePassedInMilliSeconds / 1000)} s
+            </h2>
+            <div className="d-flex justify-content-center">
+                <button className="btn btn-outline-primary mr-2" onClick={start}>
+                    start
+                </button>
+                <button className="btn btn-outline-danger mr-2" onClick={stop}>
+                    stop
+                </button>
+                <button className="btn btn-outline-warning" onClick={reset}>
+                    reset
+                </button>
             </div>
-        )
-    }
+        </div>
+    ) 
 }
 
-const container = document.getElementById('root');
-const root = ReactDOM.createRoot(container);
-root.render(<StopWatch />);
+ReactDOM.render(
+    <StopWatch />,
+    document.getElementById('root')
+);

@@ -1,100 +1,76 @@
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _React = React,
+    useState = _React.useState,
+    useEffect = _React.useEffect,
+    useRef = _React.useRef;
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+var StopWatch = function StopWatch() {
+    var _useState = useState(0),
+        _useState2 = _slicedToArray(_useState, 2),
+        timePassedInMilliSeconds = _useState2[0],
+        setTimePassed = _useState2[1];
 
-var StopWatch = function (_React$Component) {
-    _inherits(StopWatch, _React$Component);
+    var timer = useRef(null);
 
-    function StopWatch(props) {
-        _classCallCheck(this, StopWatch);
+    var start = function start() {
+        if (!timer.current) {
+            var startTime = Date.now();
+            timer.current = setInterval(function () {
+                console.log("timePassedInMilliSeconds:", timePassedInMilliSeconds);
+                var stopTime = Date.now();
 
-        var _this = _possibleConstructorReturn(this, (StopWatch.__proto__ || Object.getPrototypeOf(StopWatch)).call(this, props));
+                // use a call back in setState to get the latest state value
+                setTimePassed(function (timePassedInMilliSeconds) {
+                    return stopTime - startTime + timePassedInMilliSeconds;
+                });
 
-        _this.state = {
-            timePassedInMilliSeconds: 0
-        };
-
-        _this.timer = null;
-
-        _this.start = _this.start.bind(_this);
-        _this.stop = _this.stop.bind(_this);
-        _this.reset = _this.reset.bind(_this);
-        return _this;
-    }
-
-    _createClass(StopWatch, [{
-        key: "start",
-        value: function start() {
-            var _this2 = this;
-
-            if (!this.timer) {
-                var startTime = Date.now();
-                this.timer = setInterval(function () {
-                    var stopTime = Date.now();
-                    var timePassedInMilliSeconds = stopTime - startTime + _this2.state.timePassedInMilliSeconds;
-                    _this2.setState({
-                        timePassedInMilliSeconds: timePassedInMilliSeconds
-                    });
-                    startTime = stopTime;
-                }, 250);
-            }
+                startTime = stopTime;
+            }, 1000);
         }
-    }, {
-        key: "stop",
-        value: function stop() {
-            window.clearInterval(this.timer);
-            this.timer = null;
-        }
-    }, {
-        key: "reset",
-        value: function reset() {
-            this.stop();
-            this.setState({
-                timePassedInMilliSeconds: 0
-            });
-        }
-    }, {
-        key: "render",
-        value: function render() {
-            return React.createElement(
-                "div",
-                null,
-                React.createElement(
-                    "h2",
-                    { className: "border px-3 py-4 rounded my-3 mx-auto text-center", style: { maxWidth: "300px" } },
-                    Math.floor(this.state.timePassedInMilliSeconds / 1000),
-                    " s"
-                ),
-                React.createElement(
-                    "div",
-                    { className: "d-flex justify-content-center" },
-                    React.createElement(
-                        "button",
-                        { className: "btn btn-outline-primary mr-2", onClick: this.start },
-                        "start"
-                    ),
-                    React.createElement(
-                        "button",
-                        { className: "btn btn-outline-danger mr-2", onClick: this.stop },
-                        "stop"
-                    ),
-                    React.createElement(
-                        "button",
-                        { className: "btn btn-outline-warning", onClick: this.reset },
-                        "reset"
-                    )
-                )
-            );
-        }
-    }]);
+    };
 
-    return StopWatch;
-}(React.Component);
+    var stop = function stop() {
+        console.log('stop', timer.current);
+        window.clearInterval(timer.current);
+        timer.current = null;
+    };
 
-var container = document.getElementById('root');
-var root = ReactDOM.createRoot(container);
-root.render(React.createElement(StopWatch, null));
+    var reset = function reset() {
+        stop();
+        setTimePassed(0);
+    };
+
+    return React.createElement(
+        "div",
+        null,
+        React.createElement(
+            "h2",
+            { className: "border px-3 py-4 rounded my-3 mx-auto text-center", style: { maxWidth: "300px" } },
+            Math.floor(timePassedInMilliSeconds / 1000),
+            " s"
+        ),
+        React.createElement(
+            "div",
+            { className: "d-flex justify-content-center" },
+            React.createElement(
+                "button",
+                { className: "btn btn-outline-primary mr-2", onClick: start },
+                "start"
+            ),
+            React.createElement(
+                "button",
+                { className: "btn btn-outline-danger mr-2", onClick: stop },
+                "stop"
+            ),
+            React.createElement(
+                "button",
+                { className: "btn btn-outline-warning", onClick: reset },
+                "reset"
+            )
+        )
+    );
+};
+
+ReactDOM.render(React.createElement(StopWatch, null), document.getElementById('root'));
